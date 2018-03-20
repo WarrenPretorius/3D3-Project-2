@@ -1,0 +1,4 @@
+The routing table contains all of the connection a router has and the cost of sending a packet to each other router.
+The data is initialy parsed from a text file. Hopefully this data will be parsed from a udp packet in the future.
+The data in the routing table is stored in an adjacency list graph format. Maybe this will make implemnting
+Belmann-Ford in the future. Each computer should be running the routing/fowarding table.
