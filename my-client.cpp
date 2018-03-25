@@ -15,13 +15,37 @@ int main(){
 	server.sin_family = AF_INET; // AF_INET = IPv4 addresses
 	server.sin_port = htons(54000); // Little to big endian conversion
 	inet_pton(AF_INET, "127.0.0.1", &server.sin_addr); // Convert from string to byte array
+	
+	sockaddr_in client;                             // Create client
+    int clientLength = sizeof( client );
+    socklen_t clientLength2 = sizeof( client );
+    char buff[1024], send_data[1024];
+    int bytes_In;
 
-	// Socket creation, note that the socket type is datagram
-	int out = socket(AF_INET, SOCK_DGRAM, 0);
+	while (true){
+		bzero( &client, clientLength );
+		bzero( buff, 1024 );
 
-	// Write out to that socket
-	string s = "Hello there buddy old pal";
-	int sendOk = sendto(out, s.c_str(), s.size() + 1, 0, (sockaddr*)&server, sizeof(server));
+		// Socket creation, note that the socket type is datagram
+		int out = socket(AF_INET, SOCK_DGRAM, 0);
+
+		// Write out to that socket
+		cout << "Send: ";
+        cin.getline( send_data, 1024 );
+		//string s = "Hello there buddy old pal";
+		int sendOk = sendto(out, send_data, strlen( send_data ), 0, (sockaddr*)&server, sizeof(server));
+
+		bytes_In = recvfrom( out, buff, 1024, 0, (struct sockaddr *)&client, &clientLength2 );
+		
+		char clientIP[256];
+		bzero( clientIP, 256 );
+
+		inet_ntop( AF_INET, &client.sin_addr, clientIP, 256 );          // Change from byte array to chars
+		int clientPort = ntohs( client.sin_port );						// Get port number of sender
+        cout << "Message from " << clientIP << " , Port Number " << clientPort <<" : " << buff << endl;
+		//cout << "Message from " << clientIP << " : " << buff << endl;
+	}
+	
 
     return 0;
 }

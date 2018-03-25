@@ -12,7 +12,7 @@ my-client: $(CLASSES)
 	$(CXX) -o $@ $^ $(CXXFLAGS) $@.cpp
 
 clean:
-	rm -rf *.o *~ *.gch *.swp *.dSYM my-router my-client*.tar.gz
+	rm -rf *.o *~ *.gch *.swp *.dSYM my-router my-client *.tar.gz
 
 tarball: clean
 	tar -cvf $(USERID).tar.gz *

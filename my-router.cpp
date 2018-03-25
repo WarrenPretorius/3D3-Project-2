@@ -7,7 +7,6 @@
 #include <sys/socket.h>     // Also sockets & binding
 #include <stdlib.h>         // Includes atoi func
 
-
 using namespace std;
 
 int main(){
@@ -15,12 +14,12 @@ int main(){
     
     
     int sock, bytes_read;
-    int port_num;                    // Set the port number
+    int port_num;
     char send_data[1024], recv_data[1024];
     struct sockaddr_in router_addr, client_addr;
 
-    string input;
-    cout << "What's my portnum: ";
+    string input;                           
+    cout << "What's my portnum: ";          // Allow user to specify the port number of the router being set up
     cin >> input;
     port_num = atoi( input.c_str() );
 
@@ -44,11 +43,12 @@ int main(){
     cout << "Router online. Accepting data on port " << port_num << endl;
     fflush(stdout);     // Clear output stream
 
-    sockaddr_in client;
+    struct sockaddr_in client;                             // Create client
     int clientLength = sizeof( client );
     socklen_t clientLength2 = sizeof( client );
     char buff[1024];
     int bytes_In;
+    
    
 
     while (1){
@@ -60,12 +60,13 @@ int main(){
         char clientIP[256];
         bzero( clientIP, 256 );
 
-        inet_ntop( AF_INET, &client.sin_addr, clientIP, 256 );
-        cout << "Message from " << clientIP << " : " << buff << endl;
+        inet_ntop( AF_INET, &client.sin_addr, clientIP, 256 );          // Change from byte array to chars
+        int clientPort = ntohs( client.sin_port );                      // Get port number of sender
+        cout << "Message from " << clientIP << " , Port Number " << clientPort <<" : " << buff << endl;
         
         
         cout << "Send: ";
-        cin >> send_data;
+        cin.getline( send_data, 1024 );
 
         sendto( sock, send_data, strlen( send_data ), 0, (struct sockaddr *)&client, sizeof(struct sockaddr) );
 
