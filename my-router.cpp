@@ -11,15 +11,24 @@
 
 using namespace std;
 
+void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_port_num );
+
 int main(){
     // Following example from http://matrixsust.blogspot.ie/2011/10/udp-server-client-in-c.html
     // Also referred to video by Sloan Kelly; https://www.youtube.com/watch?v=uIanSvWou1M 
     
+
+    // Create routing table and parse the information stored in the file "routingtable.txt"
+    RoutingTable routingtable;
+    routingtable.makeRoutingTable();
+    routingtable.parseData();
+
+    // Read in router infromation from user
     string input;
     char nodeLetter;
     int sock, bytes_read, my_port_num;
     char send_data[1024], recv_data[1024];
-    struct sockaddr_in router_addr, client_addr;                               
+    struct sockaddr_in router_addr, client_addr;            
     
     cout << "Enter node letter: ";      // Allow user to enter letter of node being created
     cin >> nodeLetter;
@@ -27,7 +36,10 @@ int main(){
     cin >> input;
     cout << endl;
     my_port_num = atoi( input.c_str() );
+    Node* myNodes = routingtable.getMyNodes( nodeLetter );      // Get a pointer to the list of connections this router has
+    routingtable.printMyNodes( myNodes );
 
+    // Create and bind socket
     if( ( sock = socket( AF_INET, SOCK_DGRAM, 0 ) ) == -1 ){    // Set sock to socket descriptor
         perror("Problem opening Socket");                       // using IPv4 and UDP
         exit(1);
@@ -45,8 +57,10 @@ int main(){
         exit(1);
     }
 
-    cout << "Router " << nodeLetter << " online. Accepting data on port " << my_port_num << "." << endl;
+    cout << "Router " << nodeLetter << " online. Accepting data on port " << my_port_num << "." << endl << endl;
     fflush(stdout);     // Clear output stream
+
+    broadcastLiveliness( sock, myNodes, nodeLetter, my_port_num );
 
     struct sockaddr_in client;                             // Create client
     int clientLength = sizeof( client );
@@ -54,6 +68,8 @@ int main(){
     char buff[1024];
     int bytes_In;   
 
+
+    // Router now ready to send and recieve data
     while (1){
         bzero( &client, clientLength );
         bzero( buff, 1024 );
@@ -65,15 +81,42 @@ int main(){
 
         inet_ntop( AF_INET, &client.sin_addr, clientIP, 256 );          // Change from byte array to chars
         int clientPort = ntohs( client.sin_port );                      // Get port number of sender
-        cout << "Message from " << clientIP << " , Port Number " << clientPort <<" : " << buff << endl;
+        cout << "Message from " << clientIP << ", Port Number " << clientPort <<": " << endl << buff << endl << endl;
         
         
-        cout << "Send: ";
+        /* cout << "Send: ";
         cin.getline( send_data, 1024 );
 
-        sendto( sock, send_data, strlen( send_data ), 0, (struct sockaddr *)&client, sizeof(struct sockaddr) );
+        sendto( sock, send_data, strlen( send_data ), 0, (struct sockaddr *)&client, sizeof(struct sockaddr) ); */
 
     }
 
     return 0;
+}
+
+
+void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_port_num ){
+    Node* currentNode = myNodes;
+    currentNode = currentNode->getNext();
+    
+    struct sockaddr_in client;
+	client.sin_family = AF_INET; // AF_INET = IPv4 addresses
+	client.sin_port = htons( currentNode->getPort() ); // Little to big endian conversion
+	inet_pton(AF_INET, "127.0.0.1", &client.sin_addr); // Convert from string to byte array
+	
+    int clientLength = sizeof( client );
+    socklen_t clientLength2 = sizeof( client );
+    char buff[1024];
+    int bytes_In;
+
+    stringstream message;
+    message << "Router " << myNodeLetter << " online. Accepting data on port " << my_port_num << "." << endl;
+    const string& temp = message.str();
+    const char* cstr = temp.c_str();
+
+    while ( currentNode != NULL ){
+        client.sin_port = htons( currentNode->getPort() );
+        sendto( mySock, cstr, strlen( cstr ), 0, (struct sockaddr *)&client, sizeof(struct sockaddr) );
+        currentNode = currentNode->getNext();
+    }
 }

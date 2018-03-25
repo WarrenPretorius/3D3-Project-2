@@ -67,6 +67,8 @@ class RoutingTable{
         void parseData();
         void addEdge(int w, int port, char star, char destination);
         void printTable();
+        void printMyNodes( Node* myNodes );
+        Node* getMyNodes( char myLetter );
         NodeList* getArray(int a){ return array + a; }
 };
 
@@ -163,6 +165,26 @@ void RoutingTable::printTable(){
         }
         cout << endl;
     }
+}
+
+Node* RoutingTable::getMyNodes( char myLetter ){
+    Node* myNodes;
+    for (int i = 0; i < size; i++ ){
+        myNodes = array[i].getHead();
+        if ( myNodes->getID() == myLetter ){
+            return myNodes;
+        }
+    }
+}
+
+void RoutingTable::printMyNodes( Node* myNodes ){
+    Node* currentNode = myNodes;
+    cout << "My connections are: " << endl;
+    while(currentNode != NULL){
+            cout << currentNode -> getID() << ", " << currentNode -> getPort() << ", " << currentNode -> getCost() << endl;
+            currentNode = currentNode -> getNext();
+        }
+        cout << endl;
 }
 
 /* int main(int argc, char* argv[]){
