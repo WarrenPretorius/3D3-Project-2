@@ -165,10 +165,10 @@ void RoutingTable::printTable(){
     }
 }
 
-int main(int argc, char* argv[]){
+/* int main(int argc, char* argv[]){
     RoutingTable routingtable;
     routingtable.makeRoutingTable();
     routingtable.parseData();
     routingtable.printTable();
     return 0;   
-}
+} */

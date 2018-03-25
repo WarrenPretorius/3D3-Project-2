@@ -7,21 +7,26 @@
 #include <sys/socket.h>     // Also sockets & binding
 #include <stdlib.h>         // Includes atoi func
 
+#include "RoutingTable.cpp"
+
 using namespace std;
 
 int main(){
     // Following example from http://matrixsust.blogspot.ie/2011/10/udp-server-client-in-c.html
+    // Also referred to video by Sloan Kelly; https://www.youtube.com/watch?v=uIanSvWou1M 
     
-    
-    int sock, bytes_read;
-    int port_num;
+    string input;
+    char nodeLetter;
+    int sock, bytes_read, my_port_num;
     char send_data[1024], recv_data[1024];
-    struct sockaddr_in router_addr, client_addr;
-
-    string input;                           
-    cout << "What's my portnum: ";          // Allow user to specify the port number of the router being set up
+    struct sockaddr_in router_addr, client_addr;                               
+    
+    cout << "Enter node letter: ";      // Allow user to enter letter of node being created
+    cin >> nodeLetter;
+    cout << "Enter portnum: ";          // Allow user to specify the port number of the router being set up
     cin >> input;
-    port_num = atoi( input.c_str() );
+    cout << endl;
+    my_port_num = atoi( input.c_str() );
 
     if( ( sock = socket( AF_INET, SOCK_DGRAM, 0 ) ) == -1 ){    // Set sock to socket descriptor
         perror("Problem opening Socket");                       // using IPv4 and UDP
@@ -29,7 +34,7 @@ int main(){
     }
 
     router_addr.sin_family = AF_INET;                           // IPv4
-    router_addr.sin_port = htons(port_num);                     // Use network byte order
+    router_addr.sin_port = htons(my_port_num);                  // Use network byte order
     router_addr.sin_addr.s_addr = inet_addr("127.0.0.1");       // To bind socket to "localhost"
     memset(router_addr.sin_zero, '\0', sizeof(router_addr.sin_zero));       // Clear memory
     
@@ -40,16 +45,14 @@ int main(){
         exit(1);
     }
 
-    cout << "Router online. Accepting data on port " << port_num << endl;
+    cout << "Router " << nodeLetter << " online. Accepting data on port " << my_port_num << "." << endl;
     fflush(stdout);     // Clear output stream
 
     struct sockaddr_in client;                             // Create client
     int clientLength = sizeof( client );
     socklen_t clientLength2 = sizeof( client );
     char buff[1024];
-    int bytes_In;
-    
-   
+    int bytes_In;   
 
     while (1){
         bzero( &client, clientLength );
