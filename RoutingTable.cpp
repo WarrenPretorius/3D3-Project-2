@@ -68,6 +68,7 @@ public:
     
     void makeRoutingTable();
     void parseData();
+    void parseData(string line);
     void addEdge(int w, int port, char star, char destination);
     void printTable();
     void updateTable();
@@ -163,6 +164,17 @@ void RoutingTable::parseData(){
     fclose(data);
 }
 
+void RoutingTable::parseData(string line){
+    char dest, start;
+    int w = 0, p = 0;
+    dest = line[2];
+    start = line[0];
+    stringstream s1 (line.substr(4,8));
+    w = line[10] - 65;
+    s1 >> p;
+    addEdge(w, p, start, dest);    
+}
+
 void RoutingTable::createDV(){
     ofstream data;
     data.open("UpdatedRoutingTable.txt");
@@ -171,33 +183,36 @@ void RoutingTable::createDV(){
         cout << "Not open";
         
     Node* head;
+    Node* temp;
+    data << "~D" << endl;
     for(int i = 0; i < size; i++){
     head = array[i].getHead();
-    cout << "here";
-        while(head != NULL){
+    temp = array[i].getHead();
+        while(temp -> getNext() != NULL){
             data << head -> getID();
             data << ",";
-            data << head -> getNext() -> getID();
+            data << temp -> getNext() -> getID();
             data << ",";
-            data << head -> getPort();
-            data << "," << head -> getCost();
-            data << endl;
+            data << temp -> getNext() -> getPort();
+            data << "," << temp -> getNext() -> getCost() << endl;
             
-            head = head -> getNext();
+            temp = temp -> getNext();
         }
     }
 }
 
-/*void RoutingTable::printTable(){
+void RoutingTable::printTable(){
     Node* head;
     for(int i = 0; i < size ; i++){
-        cout << i << endl;
         head = array[i].getHead();
         while(head != NULL){
             cout << head -> getID() << "," << head -> getPort() << "," << head -> getCost() << endl;
+            head = head -> getNext();
         }
+        cout << endl;
     }
-}*/
+    cout << endl << endl;
+}
 
 void RoutingTable::requestDV(){
     /*
@@ -216,34 +231,46 @@ void RoutingTable::sendDV(){
     
 }
 
-/*void RoutingTable::updateTable(){
-    //Each router should have its own version of the initialisation file.
-    //It should then ask its neighbours to send its data with udp messages
-    //each router broadcasts a routing table table to all of its neigbourghs
-    NodeList* temp;
-    temp = routingtable.getArray(0);
+void RoutingTable::updateTable(){
+    /*
+    The router receives a dv message and it then takes that message and parses it into its own routing table.
+    The router must avoid putting in things that it already has
+    */
+    fstream data;
+    data.open("UpdatedRoutingTable.txt");
     
-    for(int i =0; i < routingtable.getSize(); i++){
-        if((temp[i].getHead() != NULL) && (this -> getArray(i) -> getHead() == NULL)){
-        /*
-        Here it is checking that the head of the received linked lists are not NULL. 
-        If the received heads are not NULL and the heads of the roiting table on this router are NULL; that means that there are new entries that have been
-        Received. They must be added to the routing table on this device (graph)
-        */
-           // array[i] = temp[i];
-        //The table should now be up to date with its neighbours table
-       // }
-   // }
-//}*/
+    string line;
+    string dvmessage;
+    if (data.is_open()){
+        while ( getline (data,line) ){
+            dvmessage = dvmessage + line + "\n";
+        }
+        data.close();
+    }
+    
+    for(int i = 0; i < dvmessage.length(); i++){
+        if(dvmessage[i] <= 'Z' && dvmessage[i] >= 'A'){
+        cout << 
+            if(dvmessage[i+2] <= 'Z' && dvmessage[i+2] >= 'A'){
+                if(array+(dvmessage[i]-65) != NULL){
+                    parseData(dvmessage.substr(i,i+10));
+                    i = i + 12;
+                }
+            }
+                
+        }
+    }
+}
 
 int main(){
     RoutingTable routingtable;
     routingtable.makeRoutingTable();
     routingtable.parseData();
-    cout << "about to create dv";
-    routingtable.createDV();
-    cout<<"Im here";
-    
+    routingtable.printTable();
+    //routingtable.createDV();
+    routingtable.updateTable();
+    routingtable.printTable();
+
   /*  int sock, bytes_read, addr_len;
     int port_num = routingtable.getArray(0) -> getHead() -> getPort();                    // Set the port number
     char send_data[1024], recv_data[1024];
@@ -267,6 +294,6 @@ int main(){
 
     cout << "Router online. Accepting data on port " << port_num << endl;
     fflush(stdout);     // Clear output stream
-    
-    return 0;   */
+    */
+    return 0;
 }
