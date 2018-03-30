@@ -1,3 +1,8 @@
+
+// UNUSED //
+
+
+/*
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -46,7 +51,7 @@ void parseMessage(char vBuff[]) {
 		}
 		/*for (int y = 0; y < sizeof(message_arr); y++) {
 			cout << message_arr[y];
-		}*/
+		}
 		string message(message_arr, sizeof(message_arr));	//should convert 
 		cout << endl << message;	                        //test to see what message is
 	}
