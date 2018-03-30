@@ -8,6 +8,7 @@
 #include <stdlib.h>         // Includes atoi func
 
 #include "RoutingTable.cpp"
+#include "datagramParser.cpp"
 
 using namespace std;
 
