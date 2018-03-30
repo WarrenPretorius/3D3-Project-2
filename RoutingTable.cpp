@@ -284,6 +284,7 @@ void RoutingTable::printMyNodes( Node* myNodes ){
         cout << endl;
 }
 
+/*
 int main(){
     RoutingTable routingtable;
     routingtable.makeRoutingTable();
@@ -293,7 +294,7 @@ int main(){
     routingtable.updateTable();
     routingtable.printTable();
 
-  /*  int sock, bytes_read, addr_len;
+    int sock, bytes_read, addr_len;
     int port_num = routingtable.getArray(0) -> getHead() -> getPort();                    // Set the port number
     char send_data[1024], recv_data[1024];
     struct sockaddr_in router_addr;
@@ -316,6 +317,7 @@ int main(){
 
     cout << "Router online. Accepting data on port " << port_num << endl;
     fflush(stdout);     // Clear output stream
-    */
+    
     return 0;
 }
+*/
