@@ -15,7 +15,7 @@ void messageParser::messageParserCheck(char vBuff[]) {
 		messageTypeForward(vBuff);
 	}
 
-	if (type == "~d") {
+	else if (type == "~d") {
 		cout << "\nEnter";
 		bool n_ready = false;								// So we don't initilize again
 	}

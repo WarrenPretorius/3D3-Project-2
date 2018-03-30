@@ -19,6 +19,7 @@ int main(){
 
     // Router now ready to send and recieve data
     while (1){
+        
         bzero( &client, clientLength );
         bzero( buff, 1024 );
 
