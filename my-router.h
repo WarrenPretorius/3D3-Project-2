@@ -1,3 +1,4 @@
+#pragma once
 #include <string.h>         // For using strings
 #include <iostream>         // For input/ output to console
 #include <netinet/in.h>     // For defining router address

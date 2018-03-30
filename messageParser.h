@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h> 
+#include "my-router.h"  // Just for testing
 
 using namespace std;
 
@@ -26,7 +27,8 @@ private:
 
 
 public:
-	void messageParserCheck(char vBuff[]);
-	void messageTypeForward(char vBuff[]);
+    void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]);
+    void messageTypeForward(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]);
+
 	void messageTypeDV(char vBuff[]);
 };

@@ -1,7 +1,9 @@
 #include "messageParser.h"
+#include "my-router.h"
 
-void messageParser::messageParserCheck(char vBuff[]) {
-	bool n_ready = true;									// For initilization
+void messageParser::messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]) {
+	
+    bool n_ready = true;									// For initilization
 
 	if (n_ready) {
 		for (int i = 0; i < sizeof(message_type); i++) {	// Message type will always consist of 2 chars: ~m or ~d
@@ -12,7 +14,7 @@ void messageParser::messageParserCheck(char vBuff[]) {
 
 	if (type == "~m") {										// Check what type of message we have
 		bool n_ready = false;								// So we don't initilize again
-		messageTypeForward(vBuff);
+		messageTypeForward(my_sock, my_port, my_nodes, client, vBuff);
 	}
 
 	else if (type == "~d") {
@@ -25,10 +27,11 @@ void messageParser::messageParserCheck(char vBuff[]) {
 	}
 }
 
-void messageParser::messageTypeForward(char vBuff[]) {
-	strcpy(message_arr, vBuff);								// Put everyting in vbuff into message arr
-	strcpy(message_arr2, vBuff);							// Put everyting in vbuff into message arr
-	strcpy(message_arr3, vBuff);							// Put everyting in vbuff into message arr
+void messageParser::messageTypeForward(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]) {
+	
+    strcpy(message_arr, vBuff);								// Put everyting in vbuff into message arr
+	strcpy(message_arr2, vBuff);							// Put everyting in vbuff into message arr2
+	strcpy(message_arr3, vBuff);							// Put everyting in vbuff into message arr3
 
 	sourceSubString = strtok(message_arr, "S");
 	sourceSubString = strtok(NULL, " ");
@@ -40,12 +43,29 @@ void messageParser::messageTypeForward(char vBuff[]) {
 
 	substring = strtok(message_arr3, "'");					// Find the first '
 	substring = strtok(NULL, "'");							// Last quote
-	string message(substring);								// Convert into string that we can send 
+	string message(substring);								// Convert into string that we can send
+
+    if (dest_port_num == my_port){
+        cout << "Message from " << source_port_num << ": " << message << endl;
+    }
+    else {
+        Node* currentNode = my_nodes;
+        currentNode = currentNode->getNext();
+
+        while (currentNode != NULL){
+            if (currentNode->getPort == dest_port_num){
+                const char* cstr = message.c_str();
+                client.sin_port = htons( dest_port_num );
+                sendto( my_sock, cstr, strlen( cstr ), 0, (struct sockaddr *)&client, sizeof(struct sockaddr) );
+            }
+        }
+        
+    }
 
 			//TEST//
-	cout << "Source Port #: " << source_port_num << endl;	// Test to see what source port num
-	cout << "Dest Port #: " << dest_port_num << endl;		// Test to see what dest port num
-	cout << endl << message << endl;;						// Test to see what message is
+	//cout << "Source Port #: " << source_port_num << endl;	// Test to see what source port num
+	//cout << "Dest Port #: " << dest_port_num << endl;		// Test to see what dest port num
+	//cout << endl << message << endl;;						// Test to see what message is
 
 	
 
