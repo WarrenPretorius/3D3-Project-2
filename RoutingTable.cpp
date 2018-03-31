@@ -252,7 +252,7 @@ void RoutingTable::updateTable(){
     
     for(int i = 0; i < dvmessage.length(); i++){
         if(dvmessage[i] <= 'Z' && dvmessage[i] >= 'A'){
-        cout << 
+        //cout << 
             if(dvmessage[i+2] <= 'Z' && dvmessage[i+2] >= 'A'){
                 if(array+(dvmessage[i]-65) != NULL){
                     parseData(dvmessage.substr(i,i+10));
@@ -272,6 +272,7 @@ Node* RoutingTable::getMyNodes( char myLetter ){
             return myNodes;
         }
     }
+    return NULL;
 }
 
 void RoutingTable::printMyNodes( Node* myNodes ){

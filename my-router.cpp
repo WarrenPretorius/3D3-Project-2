@@ -1,3 +1,4 @@
+#include "RoutingTable.cpp"
 #include "my-router.h"
 
 int main(){
@@ -8,8 +9,10 @@ int main(){
     routingtable.parseData();
 
     // Set up router with socket and broadcast liveliness    
-    int sock = initialiseRouter( routingtable );
-
+    char nodeLetter;
+    struct sockaddr_in router;
+    int sock = initialiseRouter( routingtable, &router, &nodeLetter );
+    
     struct sockaddr_in client;                             // Create client
     int clientLength = sizeof( client );
     socklen_t clientLength2 = sizeof( client );
@@ -24,13 +27,18 @@ int main(){
         bzero( buff, 1024 );
 
         bytes_In = recvfrom( sock, buff, 1024, 0, (struct sockaddr *)&client, &clientLength2 );
+        int clientPort = ntohs( client.sin_port );
         
-        char clientIP[256];
-        bzero( clientIP, 256 );
+        
+        messageParserCheck( sock, clientPort, routingtable.getMyNodes(nodeLetter), client, buff );
+        
+        
+        //char clientIP[256];
+        //bzero( clientIP, 256 );s
 
-        inet_ntop( AF_INET, &client.sin_addr, clientIP, 256 );          // Change from byte array to chars
-        int clientPort = ntohs( client.sin_port );                      // Get port number of sender
-        cout << "Message from " << clientIP << ", Port Number " << clientPort <<": " << endl << buff << endl << endl;
+        //inet_ntop( AF_INET, &client.sin_addr, clientIP, 256 );          // Change from byte array to chars
+        //int clientPort = ntohs( client.sin_port );                      // Get port number of sender
+        //cout << "Message from " << clientIP << ", Port Number " << clientPort <<": " << endl << buff << endl << endl;
 
     }
 
