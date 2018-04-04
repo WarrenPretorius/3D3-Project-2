@@ -32,3 +32,5 @@ public:
     void setCost(int a){    cost = a;}
     
 };
+
+//Node* newNode(char nodeletter);

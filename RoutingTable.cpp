@@ -1,5 +1,13 @@
 #include "RoutingTable.h"
 
+Node* newNode(char nodeletter){
+    Node* a = new Node;
+    int port = 10000 + (int)(nodeletter - 65);
+    a -> setDest(nodeletter); 
+    a -> setPort(port);
+    return a;
+}
+
 RoutingTable::RoutingTable(){
     size = 6;
     array = NULL;   //Here the routing tables size can be changed   

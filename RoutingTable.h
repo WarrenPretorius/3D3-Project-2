@@ -11,7 +11,6 @@
 
 using namespace std;
 
-
 class RoutingTable{
 private:
     int size;
@@ -35,4 +34,3 @@ public:
     NodeList* getArray(int a){   return array + a;}
     int getSize(){  return size;}
 };
-

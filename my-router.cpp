@@ -1,6 +1,5 @@
 #include "my-router.h"
 
-
 int main(){
 
     // Create routing table and parse the information stored in the file "routingtable.txt"
