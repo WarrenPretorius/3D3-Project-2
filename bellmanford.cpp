@@ -35,11 +35,11 @@ void BellmanFord::bellmanFord(char* buf, RoutingTable r, int clientPort, char no
     //get their letter
     
     char theirLetter = clientPort - 10000 +65 ; //get from clientPort
-    int nextHopCost; //cost to them
+    int nextHopCost;                            //cost to them
     
-    Node* myNodes = r.getMyNodes(nodeLetter); //get its own routing table
+    Node* myNodes = r.getMyNodes(nodeLetter);   //get its own routing table
     //first entry of myNodes is itself with a cost of 0. so go to next
-    Node *j = myNodes->getNext(); //for each entry in my table, excluding myself
+    Node *j = myNodes->getNext();               //for each entry in my table, excluding myself
 
     while(j != NULL) {
         if(theirLetter == j->getID()) {
@@ -50,27 +50,27 @@ void BellmanFord::bellmanFord(char* buf, RoutingTable r, int clientPort, char no
     
     //check if the slot is NULL
         
-    Node* i = theirNodes; //for each entry in their table
+    Node* i = theirNodes;                       //for each entry in their table
     //first entry of myNodes is itself with a cost of 0. so go to next
-    j = myNodes->getNext(); //for each entry in my table, excluding myself
+    j = myNodes->getNext();                     //for each entry in my table, excluding myself
     while(i != NULL) {
         while(j != NULL) {
-            if(i->getID() == j->getID()) { //if their letter is equal to something already in my table
+            if(i->getID() == j->getID()) {      //if their letter is equal to something already in my table
                 if(i->getCost() /*+ cost to them*/ < j->getCost()) { //if their cost is less than my cost
                     j->setCost(i->getCost() /*+ cost to them*/); //update cost to their cost
-                    j->setPort(clientPort); //set port to route through them
+                    j->setPort(clientPort);     //set port to route through them
                     cout << "FOUND EQUAL" << endl;
-                    break; //get outta this while
+                    break;                      //get outta this while
                 }
             }
             j = j->getNext();
         } //if reached here, and j is NULL, never found equal. so we add this entry
         if(j == NULL) {
             j = newNode(i->getID());
-            j->setPort(clientPort); //route through them
+            j->setPort(clientPort);             //route through them
             j->setCost(i->getCost() /*+ cost to them*/);
         }
-        i = i->getNext(); //go to next of their nodes
+        i = i->getNext();                       //go to next of their nodes
     }
 }
 
@@ -78,14 +78,14 @@ void BellmanFord::bellmanFord(char* buf, RoutingTable r, int clientPort, char no
 //or maybe return char array?
 string BellmanFord::makeDV(RoutingTable r, char nodeLetter) {
     string DV = "~d ";
-    Node* myNodes = r.getMyNodes(nodeLetter); //get its own routing table
+    Node* myNodes = r.getMyNodes(nodeLetter);   //get its own routing table
     Node* temp = myNodes->getNext();
     //format: each line is dest letter, cost (thassit)
     while(temp != NULL) {
-        DV += temp->getID(); //add dest character
+        DV += temp->getID();                    //add dest character
         DV += ",";
-        DV += temp->getCost(); //add port (see what the heck this does), may need int to char conversion
-        DV += "\n"; //newline to separate
+        DV += temp->getCost();                  //add port (see what the heck this does), may need int to char conversion
+        DV += "\n";                             //newline to separate
     }
     
     return DV;
@@ -96,7 +96,7 @@ Node* BellmanFord::parseDV(char* buf) {
     int cost;
     //go past initial ~d
     int i = 0;
-    while(i < 3){ //go past buf[0], [1], [2]
+    while(i < 3){                               //go past buf[0], [1], [2]
         i++;
     }
 
@@ -107,32 +107,32 @@ Node* BellmanFord::parseDV(char* buf) {
     
     while (buf[i] != ',' ) {
         i++;
-    } //now it's a comma
-    i++; //now it's past the comma
+    }                                           //now it's a comma
+    i++;                                        //now it's past the comma
     
-    cost = buf[i] - '0'; //convert char to int
+    cost = buf[i] - '0';                        //convert char to int
     head->setCost(cost);
     
     Node* prev = head;
     prev->setNext(temp);
     
     //now get the rest
-    while(buf[i] != '\0') { //while not end of string
+    while(buf[i] != '\0') {                     //while not end of string
         while (buf[i] != '\n' ) {
         i++;
-        } //now it's a newline
-        i++; //now it's past newline
-        temp = newNode(buf[i]); //set dest letter
+        }                                       //now it's a newline
+        i++;                                    //now it's past newline
+        temp = newNode(buf[i]);                 //set dest letter
               
         while (buf[i] != ',' ) {
         i++;
-        } //now it's a comma
-        i++; //now it's past the comma
+        }                                       //now it's a comma
+        i++;                                    //now it's past the comma
         
-        cost = buf[i] - '0'; //convert char to int
+        cost = buf[i] - '0';                    //convert char to int
         temp->setCost(cost);
-        prev->setNext(temp);  //link it to list
-        prev = temp;            //get ready to add next node
+        prev->setNext(temp);                    //link it to list
+        prev = temp;                            //get ready to add next node
     }
     
 }
