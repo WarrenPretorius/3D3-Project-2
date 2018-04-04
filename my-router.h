@@ -9,6 +9,7 @@
 #include <stdlib.h>         // Includes atoi func
 
 #include "RoutingTable.h"
+#include "bellmanford.h"
 
 using namespace std;
 
@@ -17,3 +18,4 @@ void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_p
 void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]);
 void messageTypeForward(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]);
 void messageTypeDV(char vBuff[]);
+//void outputMessage(RoutingTable* routingtable, char[] vBuff);

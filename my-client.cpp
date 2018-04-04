@@ -6,6 +6,7 @@
 #include <sys/types.h>      // For sockets & binding
 #include <sys/socket.h>     // Also sockets & binding
 #include <stdlib.h>         // Includes atoi func
+#include <sstream>
 
 using namespace std;
 
@@ -13,7 +14,7 @@ int main(){
 
     sockaddr_in server;
 	server.sin_family = AF_INET; // AF_INET = IPv4 addresses
-	server.sin_port = htons(54000); // Little to big endian conversion
+	server.sin_port = htons(10001); // Little to big endian conversion
 	inet_pton(AF_INET, "127.0.0.1", &server.sin_addr); // Convert from string to byte array
 	
 	sockaddr_in client;                             // Create client
@@ -30,10 +31,14 @@ int main(){
 		int out = socket(AF_INET, SOCK_DGRAM, 0);
 
 		// Write out to that socket
-		cout << "Send: ";
-        cin.getline( send_data, 1024 );
+		stringstream message_send;
+		message_send << "~m S10000" << " D" << "10002" << " 'Testing Testing 123'" << endl;
+		const string& temp = message_send.str();
+		const char* cstr = temp.c_str();
+		//cout << "Send: ";
+        //cin.getline( send_data, 1024 );
 		//string s = "Hello there buddy old pal";
-		int sendOk = sendto(out, send_data, strlen( send_data ), 0, (sockaddr*)&server, sizeof(server));
+		int sendOk = sendto(out, cstr, strlen( cstr ), 0, (sockaddr*)&server, sizeof(server));
 
 		bytes_In = recvfrom( out, buff, 1024, 0, (struct sockaddr *)&client, &clientLength2 );
 		

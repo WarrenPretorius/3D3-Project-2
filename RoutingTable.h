@@ -11,6 +11,8 @@
 
 using namespace std;
 
+Node* newNode(char nodeletter);
+
 class RoutingTable{
 private:
     int size;

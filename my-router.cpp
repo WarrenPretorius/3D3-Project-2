@@ -27,13 +27,13 @@ int main(){
 
         bytes_In = recvfrom( sock, buff, 1024, 0, (struct sockaddr *)&client, &clientLength2 );
         int clientPort = ntohs( client.sin_port );
+        int my_port = ntohs( router.sin_port );
         
-        
-        messageParserCheck( sock, clientPort, routingtable.getMyNodes(nodeLetter), client, buff );
+        messageParserCheck( sock, my_port, routingtable.getMyNodes(nodeLetter), client, buff );
         
         
         //char clientIP[256];
-        //bzero( clientIP, 256 );s
+        //bzero( clientIP, 256 );
 
         //inet_ntop( AF_INET, &client.sin_addr, clientIP, 256 );          // Change from byte array to chars
         //int clientPort = ntohs( client.sin_port );                      // Get port number of sender
@@ -97,11 +97,12 @@ void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_p
 
     stringstream message;
     
-
+    cout << "Sending following messages: " << endl;
     while ( currentNode != NULL ){
         int clientPort = currentNode->getPort();
         client.sin_port = htons( clientPort );
 
+        message.str("");
         message << "~m S" << my_port_num << " D"<< clientPort << " 'Router " << myNodeLetter << " online. Accepting data on port " << my_port_num << ".'" << endl;
         cout <<"~m S" << my_port_num << " D"<< clientPort << " 'Router " << myNodeLetter << " online. Accepting data on port " << my_port_num << ".'" << endl;
         const string& temp = message.str();
@@ -110,10 +111,11 @@ void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_p
         sendto( mySock, cstr, strlen( cstr ), 0, (struct sockaddr *)&client, sizeof(struct sockaddr) );
         currentNode = currentNode->getNext();
     }
+    cout << endl;
 }
 
 void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]) {
-       
+
 	char message_type[2];       // This is meant to hold ~m or ~d, stores the first 2 chars in an array, then convert that array to a string
 							    // then compare that string to what it should be (ex: ~m or ~d) and if it equals to one of those
 							    // then enter the loop for that message type. Have not implemented ~d yet. Also ~m could be improved.
@@ -124,6 +126,7 @@ void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in cl
 			message_type[i] = vBuff[i];						// Store the 1st 2 chars of the buffer into the message typr
 		}
 	}
+ 
 	string type(message_type, sizeof(message_type));		// Since array is not null terminated, need to specify length of array
 
 	if (type == "~m") {										// Check what type of message we have
@@ -168,20 +171,68 @@ void messageTypeForward(int my_sock, int my_port, Node* my_nodes, sockaddr_in cl
 	substring = strtok(NULL, "'");							// Last quote
 	string message(substring);								// Convert into string that we can send
 
+    //cout << "Message Recieved... " << endl;
+    //cout << "Source Port: " << source_port_num << endl;
+    //cout << "Dest Port: " << dest_port_num << endl;
+
+    stringstream message_send;
+    message_send << "~m S" << source_port_num << " D"<< dest_port_num << " '" << message << "'" << endl;
+    const string& temp = message_send.str();
+    const char* cstr = temp.c_str();
+
     if (dest_port_num == my_port){
+        //cout << "In if statement " << endl;
         cout << "Message from " << source_port_num << ": " << message << endl;
     }
     else {
+        //cout << "In else statement " << endl;
         Node* currentNode = my_nodes;
         currentNode = currentNode->getNext();
 
         while (currentNode != NULL){
             if (currentNode->getPort() == dest_port_num){
-                const char* cstr = message.c_str();
+                //const char* cstr = message.c_str();
                 client.sin_port = htons( dest_port_num );
                 sendto( my_sock, cstr, strlen( cstr ), 0, (struct sockaddr *)&client, sizeof(struct sockaddr) );
+                cout << "Message sent to " << dest_port_num << endl;
             }
+            currentNode = currentNode->getNext();
         }
         
     }
 }
+
+
+/* void outputMessage(RoutingTable* routingtable, char[] vBuff){
+    ofstream data;
+    data.open("router-output.txt");
+    
+    if(!data.is_open())
+        cout << "Not open";
+    
+    if(vBuff[0]=='~' && vBuff[1]=='D'){    
+    Node* head;
+    Node* temp;
+    for(int i = 0; i < size; i++){
+    head = routingtable -> getArray(i).getHead();
+    temp = routingtable -> getArray(i).getHead();
+        while(temp -> getNext() != NULL){
+            data << head -> getID();
+            data << ",";
+            data << temp -> getNext() -> getID();
+            data << ",";
+            data << temp -> getNext() -> getPort();
+            data << "," << temp -> getNext() -> getCost() << endl;
+            
+            temp = temp -> getNext();
+        }        
+    }
+    }
+    
+    else{
+        for(int i = 0; i<sizeof[vBuff]; i++){
+            data << vBuff[i];
+        }
+    }
+    
+} */
