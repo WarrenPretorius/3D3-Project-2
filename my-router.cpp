@@ -29,8 +29,7 @@ int main(){
         int clientPort = ntohs( client.sin_port );
         int my_port = ntohs( router.sin_port );
         
-        messageParserCheck( sock, my_port, routingtable.getMyNodes(nodeLetter), client, buff );
-        
+        messageParserCheck( sock, my_port, routingtable.getMyNodes(nodeLetter), client, buff, routingtable, nodeLetter );
         
         //char clientIP[256];
         //bzero( clientIP, 256 );
@@ -97,14 +96,14 @@ void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_p
 
     stringstream message;
     
-    cout << "Sending following messages: " << endl;
+    //cout << "Sending following messages: " << endl;
     while ( currentNode != NULL ){
         int clientPort = currentNode->getPort();
         client.sin_port = htons( clientPort );
 
         message.str("");
         message << "~m S" << my_port_num << " D"<< clientPort << " 'Router " << myNodeLetter << " online. Accepting data on port " << my_port_num << ".'" << endl;
-        cout <<"~m S" << my_port_num << " D"<< clientPort << " 'Router " << myNodeLetter << " online. Accepting data on port " << my_port_num << ".'" << endl;
+        //cout <<"~m S" << my_port_num << " D"<< clientPort << " 'Router " << myNodeLetter << " online. Accepting data on port " << my_port_num << ".'" << endl;
         const string& temp = message.str();
         const char* cstr = temp.c_str();
 
@@ -114,7 +113,7 @@ void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_p
     cout << endl;
 }
 
-void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]) {
+void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[], RoutingTable routingtable, char myLetter) {
 
 	char message_type[2];       // This is meant to hold ~m or ~d, stores the first 2 chars in an array, then convert that array to a string
 							    // then compare that string to what it should be (ex: ~m or ~d) and if it equals to one of those
@@ -137,6 +136,7 @@ void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in cl
 	else if (type == "~d") {
 		cout << "\nEnter";
 		bool n_ready = false;								// So we don't initilize again
+        BellmanFord::bellmanFord( vBuff, routingtable, client.sin_port, myLetter);
 	}
 
 	else {													// Small error here, enters this loop even if type == ~m, will fix later
@@ -194,45 +194,10 @@ void messageTypeForward(int my_sock, int my_port, Node* my_nodes, sockaddr_in cl
                 //const char* cstr = message.c_str();
                 client.sin_port = htons( dest_port_num );
                 sendto( my_sock, cstr, strlen( cstr ), 0, (struct sockaddr *)&client, sizeof(struct sockaddr) );
-                cout << "Message sent to " << dest_port_num << endl;
+                cout << "Message forwarded to " << dest_port_num << endl;
             }
             currentNode = currentNode->getNext();
         }
         
     }
 }
-
-
-/* void outputMessage(RoutingTable* routingtable, char[] vBuff){
-    ofstream data;
-    data.open("router-output.txt");
-    
-    if(!data.is_open())
-        cout << "Not open";
-    
-    if(vBuff[0]=='~' && vBuff[1]=='D'){    
-    Node* head;
-    Node* temp;
-    for(int i = 0; i < size; i++){
-    head = routingtable -> getArray(i).getHead();
-    temp = routingtable -> getArray(i).getHead();
-        while(temp -> getNext() != NULL){
-            data << head -> getID();
-            data << ",";
-            data << temp -> getNext() -> getID();
-            data << ",";
-            data << temp -> getNext() -> getPort();
-            data << "," << temp -> getNext() -> getCost() << endl;
-            
-            temp = temp -> getNext();
-        }        
-    }
-    }
-    
-    else{
-        for(int i = 0; i<sizeof[vBuff]; i++){
-            data << vBuff[i];
-        }
-    }
-    
-} */

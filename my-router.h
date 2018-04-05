@@ -15,7 +15,6 @@ using namespace std;
 
 int initialiseRouter( RoutingTable  routingtable, struct sockaddr_in* router, char* nodeLetter );
 void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_port_num );
-void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]);
+void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[], RoutingTable routingtable, char myLetter);
 void messageTypeForward(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]);
 void messageTypeDV(char vBuff[]);
-//void outputMessage(RoutingTable* routingtable, char[] vBuff);
