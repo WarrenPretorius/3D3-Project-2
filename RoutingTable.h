@@ -18,21 +18,22 @@ private:
     int size;
     NodeList* array;
 public:
-    RoutingTable();  //Make the defualt constructor read in the initial values
-    
+    // See RoutingTable.cpp for desciprtions of functions.
+
+    RoutingTable();
     void makeRoutingTable();
     void parseData();
-    void parseData(string line);
-    void addEdge(int w, int port, char star, char destination);
+    void parseData( string line );
+    void addEdge( int w, int port, char star, char destination );
     void printTable();
     void updateTable();
     void sendDV();
     void requestDV();
-    void route(string filename);
+    void route( string filename );
     void createDV();
     Node* getMyNodes( char myLetter );
     void printMyNodes( Node* myNodes );
 
-    NodeList* getArray(int a){   return array + a;}
-    int getSize(){  return size;}
+    NodeList* getArray( int a ){ return array + a; }
+    int getSize(){ return size; }
 };

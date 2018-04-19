@@ -13,8 +13,17 @@
 
 using namespace std;
 
+// Sets up all ports etc for this router
 int initialiseRouter( RoutingTable  routingtable, struct sockaddr_in* router, char* nodeLetter );
+
+// Let all my neighbours know I'm alive
 void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_port_num );
+
+// Check what type of message was recived and call appropriate secondary parser
 void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[], RoutingTable routingtable, char myLetter);
+
+// If message type was forward, this is called to forward the message
 void messageTypeForward(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]);
+
+// If the message was a DV update, this function gets called to deal with it
 void messageTypeDV(char vBuff[]);

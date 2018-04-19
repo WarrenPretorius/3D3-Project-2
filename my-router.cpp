@@ -12,7 +12,7 @@ int main(){
     struct sockaddr_in router;
     int sock = initialiseRouter( routingtable, &router, &nodeLetter );
     
-    struct sockaddr_in client;                             // Create client
+    struct sockaddr_in client;               // Create client
     int clientLength = sizeof( client );
     socklen_t clientLength2 = sizeof( client );
     char buff[1024];
@@ -29,26 +29,18 @@ int main(){
         int clientPort = ntohs( client.sin_port );
         int my_port = ntohs( router.sin_port );
         
+        // Processes the message and calls takes appropriate actions
         messageParserCheck( sock, my_port, routingtable.getMyNodes(nodeLetter), client, buff, routingtable, nodeLetter );
-        
-        //char clientIP[256];
-        //bzero( clientIP, 256 );
-
-        //inet_ntop( AF_INET, &client.sin_addr, clientIP, 256 );          // Change from byte array to chars
-        //int clientPort = ntohs( client.sin_port );                      // Get port number of sender
-        //cout << "Message from " << clientIP << ", Port Number " << clientPort <<": " << endl << buff << endl << endl;
 
     }
-
     return 0;
 }
 
-
+// Function to set up all the ports etc for this Router
 int initialiseRouter( RoutingTable  routingtable, struct sockaddr_in* router, char* nodeLetter ) {
 
     string input;
     int sock, my_port_num;
-    //struct sockaddr_in router_addr;
 
     cout << "Enter node letter: ";      // Allow user to enter letter of node being created
     cin >> *nodeLetter;
@@ -85,18 +77,19 @@ int initialiseRouter( RoutingTable  routingtable, struct sockaddr_in* router, ch
     return sock;
 }
 
+// Function to let all this Node's neighbours know that I'm alive
 void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_port_num ){
     Node* currentNode = myNodes;
     currentNode = currentNode->getNext();
     
     struct sockaddr_in client;
-	client.sin_family = AF_INET; // AF_INET = IPv4 addresses
-	client.sin_port = htons( currentNode->getPort() ); // Little to big endian conversion
-	inet_pton(AF_INET, "127.0.0.1", &client.sin_addr); // Convert from string to byte array
+	client.sin_family = AF_INET;                        // AF_INET = IPv4 addresses
+	client.sin_port = htons( currentNode->getPort() );  // Little to big endian conversion with portnum
+	inet_pton(AF_INET, "127.0.0.1", &client.sin_addr);  // Convert from string to byte array
 
     stringstream message;
     
-    //cout << "Sending following messages: " << endl;
+    // cout << "Sending following messages: " << endl;
     while ( currentNode != NULL ){
         int clientPort = currentNode->getPort();
         client.sin_port = htons( clientPort );
@@ -113,6 +106,7 @@ void broadcastLiveliness( int mySock, Node* myNodes, char myNodeLetter, int my_p
     cout << endl;
 }
 
+// Function to check the type of message received and call the apprpriate function based off this
 void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[], RoutingTable routingtable, char myLetter) {
 
 	char message_type[2];       // This is meant to hold ~m or ~d, stores the first 2 chars in an array, then convert that array to a string
@@ -133,42 +127,44 @@ void messageParserCheck(int my_sock, int my_port, Node* my_nodes, sockaddr_in cl
 		messageTypeForward(my_sock, my_port, my_nodes, client, vBuff);
 	}
 
-	else if (type == "~d") {	//we eneter heve if a istance vector happens
+	else if (type == "~d") {
 		bool n_ready = false;								// So we don't initilize again
-        BellmanFord::bellmanFord( vBuff, routingtable, client.sin_port, myLetter);	//call the bellman ford to update the routing table
+        BellmanFord::bellmanFord( vBuff, routingtable, client.sin_port, myLetter);	// Call the bellman ford to update the routing table
+        // This BellmanFord funtion should really be static
 	}
 
 	else {													
-		cout << "\n\nInvalid Type of message in Buffer\n\n";	//if the buffer/a packet wrong format
+		cout << "\n\nInvalid Type of message in Buffer\n\n";	// If the message doesn't start with '~d' or '~m' the message in invalid
 	}
 }
 
+// Function to forward a message
 void messageTypeForward(int my_sock, int my_port, Node* my_nodes, sockaddr_in client, char vBuff[]) {
 	
     int dest_port_num;          // We will convert the array holding the port num to an int
     int source_port_num;        
     char* substring;            // Will have what is between ' '
-    char* destSubString;	//need to use a char* when using strtok function
+    char* destSubString;	    // Need to use a char* when using strtok function
     char* sourceSubString;
     char message_arr[1024];	    // Holds the everything that is in vBuff so we can take out the message between ' ', the size is 1024, same as vBuff
 	char message_arr2[1024];
 	char message_arr3[1024];
 
-    strcpy(message_arr, vBuff);								// Put everyting in vbuff into message arr
-	strcpy(message_arr2, vBuff);							// Put everyting in vbuff into message arr2
-	strcpy(message_arr3, vBuff);							// Put everyting in vbuff into message arr3
+    strcpy(message_arr, vBuff);		// Put everyting in vbuff into message arr
+	strcpy(message_arr2, vBuff);	// Put everyting in vbuff into message arr2
+	strcpy(message_arr3, vBuff);	// Put everyting in vbuff into message arr3
 
-	sourceSubString = strtok(message_arr, "S");	//once we detect a S in the buffer, we know this is a source port #
-	sourceSubString = strtok(NULL, " ");		//once we detect a space the source port number has ended, everyting inbetween is stored in sourcesubstrrin
-	source_port_num = atoi(sourceSubString);	//convert to an int
+	sourceSubString = strtok(message_arr, "S");	    // Once we detect a S in the buffer, we know this is a source port #
+	sourceSubString = strtok(NULL, " ");		    // Once we detect a space the source port number has ended, everyting inbetween is stored in sourcesubstrrin
+	source_port_num = atoi(sourceSubString);	    // Convert to an int
 
-	destSubString = strtok(message_arr2, "D");	//same as above
+	destSubString = strtok(message_arr2, "D");	    // Same as above
 	destSubString = strtok(NULL, " ");
 	dest_port_num = atoi(destSubString);
 
-	substring = strtok(message_arr3, "'");					// Find the first '
-	substring = strtok(NULL, "'");							// Last quote ', stores everything in between in substring
-	string message(substring);								// Convert into string that we can send
+	substring = strtok(message_arr3, "'");			// Find the first '
+	substring = strtok(NULL, "'");					// Last quote ', stores everything in between in substring
+	string message(substring);						// Convert into string that we can send
 
 
     stringstream message_send;
@@ -176,18 +172,17 @@ void messageTypeForward(int my_sock, int my_port, Node* my_nodes, sockaddr_in cl
     const string& temp = message_send.str();
     const char* cstr = temp.c_str();
 
-    if (dest_port_num == my_port){	//used to send message to destination by checking if we have arrived at that router yet
+    if (dest_port_num == my_port){	            // Used to send message to destination by checking if we have arrived at that router yet
         cout << "Message from " << source_port_num << ": " << message << endl;
     }
     else {
         Node* currentNode = my_nodes;
-        currentNode = currentNode->getNext();	//going through all the routers till we get to the one we want to send the mseeage to
+        currentNode = currentNode->getNext();	// Going through all the routers till we get to the one we want to send the mseeage to
 
-        while (currentNode != NULL){	//unless weve traversed all the routers
-            if (currentNode->getPort() == dest_port_num){	//get the port of the router & compare it to what we want to send to
-                //const char* cstr = message.c_str();
+        while (currentNode != NULL){	        // Unless weve traversed all the routers
+            if (currentNode->getPort() == dest_port_num){	// Get the port of the router & compare it to what we want to send to
                 client.sin_port = htons( dest_port_num );
-                sendto( my_sock, cstr, strlen( cstr ), 0, (struct sockaddr *)&client, sizeof(struct sockaddr) );	//sending message
+                sendto( my_sock, cstr, strlen( cstr ), 0, (struct sockaddr *)&client, sizeof(struct sockaddr) );	//  Send message
                 cout << "Message forwarded to " << dest_port_num << endl;
             }
             currentNode = currentNode->getNext();
